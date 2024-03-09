@@ -63,7 +63,7 @@ Val::Val(const T& val){
     if(is_same_v<remove_cv_t<T>, List>){_type=Type::List;GetValue(val);}
     else if(is_same_v<remove_cv_t<T>, Dict>){_type=Type::Dict;GetValue(val);}
     else if(is_same_v<remove_cv_t<T>, Val>){Del();*this=val;}
-    else GetValue(forward<Val&&>(val));
+    else GetValue(std::forward<Value&&>(Value(val)));
 }
 
 template<typename T>
@@ -71,7 +71,7 @@ Val::Val(T&& val){
     if constexpr (is_same_v<remove_cv_t<T>, List>){_type=Type::List;GetValue(forward<List&&>(val));}
     else if constexpr (is_same_v<remove_cv_t<T>, Dict>){_type=Type::Dict;GetValue(forward<Dict&&>(val));}
     else if(is_same_v<remove_cv_t<T>, Val>){*this=val;val=0;}
-    else {GetValue(std::forward<Val&&>(val));val=0;}
+    else {GetValue(std::forward<Value&&>(Value(val)));val=0;}
 }
 
 bool operator<(const Val& x, const Val& y);
