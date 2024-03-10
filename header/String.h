@@ -15,6 +15,7 @@ class String{
         String(const char* init);
         String(const String& init);
         String(iterator _start, iterator _end);
+        String(String&& init)noexcept;
         ~String();
 
         void Assign(const ui size, const char& c);

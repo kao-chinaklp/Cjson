@@ -42,7 +42,6 @@ class Vector{
 
         Vector():Vector(1){IsInit=true;};
         Vector(ui size, const T val=0);
-        Vector(int size, const T val=0);
         Vector(const iterator _start, const iterator _end);
         Vector(const Vector<T>& x);
         Vector(Vector<T>&& x)noexcept;
@@ -112,19 +111,6 @@ void Reverse(iterator first, iterator last){
 
 template<class T>
 Vector<T>::Vector(ui size, const T val){
-    IsInit=false;
-    Start=new T[size];
-    Finish=Start+size;
-    Rstart=Finish-1;
-    Rfinish=Start-1;
-    EndOfStorage=Start+size;
-    for(int i=0;i<size;i++)
-        Start[i]=val;
-}
-
-template<class T>
-Vector<T>::Vector(int size, const T val){
-    IsInit=false;
     Start=new T[size];
     Finish=Start+size;
     Rstart=Finish-1;

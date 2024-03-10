@@ -21,6 +21,11 @@ String::String(const String& init){
         Data[i]=init[i];
 }
 
+String::String(String&& init)noexcept{
+    Data=init.Data;
+    init.Data.Clear();
+}
+
 String::String(String::iterator _start, String::iterator _end){
     ui size=_end-_start;
     Data.Resize(size);
