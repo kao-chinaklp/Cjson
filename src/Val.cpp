@@ -1,7 +1,5 @@
 #include "Val.h"
 
-#include <utility>
-
 using std::get;
 
 Val::Val(const int& val){this->val=val;_type=Type::Int;}
@@ -93,8 +91,16 @@ void Val::Del(){
 }
 
 bool operator<(const Val& x, const Val& y){
+    typedef Vector<Val> List;
+    typedef map<Val, Val> Dict;
     if(x._type!=y._type)return x._type<y._type;
-    else return x.val<y.val;
+    if(x._type==Type::Int)return get<int>(x.val)<get<int>(y.val);
+    if(x._type==Type::Double)return get<double>(x.val)<get<double>(y.val);
+    if(x._type==Type::Bool)return get<bool>(x.val)<get<bool>(y.val);
+    if(x._type==Type::String)return get<String>(x.val)<get<String>(y.val);
+    if(x._type==Type::List)return get<List>(x.val)<get<List>(y.val);
+    if(x._type==Type::Dict)return get<Dict>(x.val)<get<Dict>(y.val);
+    return false;
 }
 
 ostream& operator<<(ostream& out, const Val& val){
