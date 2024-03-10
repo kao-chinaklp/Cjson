@@ -49,16 +49,23 @@ Val Cjson::ParseBool(){
 Val Cjson::ParseStr(){
     ss.get();
     String str;
-    while(ss.peek()!='"')str.PushBack(ss.get());
+    char c;
+    while(ss.peek()!='"'){
+        c=ss.get();
+        if(c=='\\')str.PushBack(ss.get());
+        else str.PushBack(c);
+    }
     ss.get();
     return str;
 }
 
 Val Cjson::ParseList(){
     ss.get();
-    Val list=Vector<Val>();
+    Vector<Val> list;
     while(ss.peek()!=']'){
-        list.Add(ParseVal());
+        Val tmp;
+        list.PushBack(tmp=ParseVal());
+        std::cout<<tmp<<std::endl;
         while(ss.peek()!=']'&&(ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r'||ss.peek()==','))
             ss.get();
     }
@@ -77,6 +84,7 @@ Val Cjson::ParseDict(){
         dict.Put(key, val);
         while(ss.peek()!='}'&&(ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r'||ss.peek()==','))
             ss.get();
+        std::cout<<dict<<std::endl;
     }
     ss.get();
     return dict;

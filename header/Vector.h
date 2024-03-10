@@ -40,7 +40,7 @@ class Vector{
             Vector<T>::iterator rIt;
         };
 
-        Vector():Vector(1){IsInit=true;};
+        Vector():Vector(1){IsInit=true;}
         Vector(ui size, const T val=0);
         Vector(const iterator _start, const iterator _end);
         Vector(const Vector<T>& x);
@@ -51,12 +51,12 @@ class Vector{
         Vector<T>& operator=(Vector<T>&& x)noexcept;
         T& operator[](ui pos);
         const T& operator[](ui pos)const;
-        bool operator==(const Vector<T>& y);
-        bool operator!=(const Vector<T>& y);
-        bool operator<=(const Vector<T>& y);
-        bool operator>=(const Vector<T>& y);
-        bool operator<(const Vector<T>& y);
-        bool operator>(const Vector<T>& y);
+        bool operator==(const Vector<T>& y)const;
+        bool operator!=(const Vector<T>& y)const;
+        bool operator<=(const Vector<T>& y)const;
+        bool operator>=(const Vector<T>& y)const;
+        bool operator<(const Vector<T>& y)const;
+        bool operator>(const Vector<T>& y)const;
 
         ui Size()const;
         bool Empty();
@@ -116,7 +116,7 @@ Vector<T>::Vector(ui size, const T val){
     Rstart=Finish-1;
     Rfinish=Start-1;
     EndOfStorage=Start+size;
-    for(int i=0;i<size;i++)
+    for(ui i=0;i<size;i++)
         Start[i]=val;
 }
 
@@ -178,8 +178,7 @@ Vector<T>& Vector<T>::operator=(Vector<T>&& x)noexcept{
 }
 
 template<class T>
-T &Vector<T>::operator[](ui pos)
-{
+T &Vector<T>::operator[](ui pos){
     assert(pos<Size());
     return Start[pos];
 }
@@ -191,7 +190,7 @@ const T& Vector<T>::operator[](ui pos)const{
 }
 
 template<class T>
-bool Vector<T>::operator==(const Vector<T>& y){
+bool Vector<T>::operator==(const Vector<T>& y)const{
     Vector<T>& x=*this;
     if(x.Size()!=y.Size())return false;
     for(ui i=0, j=0;i<x.Size();i++, j++)
@@ -200,14 +199,14 @@ bool Vector<T>::operator==(const Vector<T>& y){
 }
 
 template<class T>
-bool Vector<T>::operator!=(const Vector<T>& y){
+bool Vector<T>::operator!=(const Vector<T>& y)const{
     return !(*this==y);
 }
 
 template<class T>
-bool Vector<T>::operator<=(const Vector<T>& y){
+bool Vector<T>::operator<=(const Vector<T>& y)const{
     ui i=0, j=0;
-    Vector<T>& x=*this;
+    const Vector<T>& x=*this;
     while(true){
         if(i==x.Size())return true;
         if(j==y.Size())return false;
@@ -217,9 +216,9 @@ bool Vector<T>::operator<=(const Vector<T>& y){
 }
 
 template<class T>
-bool Vector<T>::operator>=(const Vector<T>& y){
+bool Vector<T>::operator>=(const Vector<T>& y)const{
     ui i=0, j=0;
-    Vector<T>& x=*this;
+    const Vector<T>& x=*this;
     while(true){
         if(j==y.Size())return true;
         if(i==x.Size())return false;
@@ -229,12 +228,12 @@ bool Vector<T>::operator>=(const Vector<T>& y){
 }
 
 template<class T>
-bool Vector<T>::operator>(const Vector<T>& y){
+bool Vector<T>::operator>(const Vector<T>& y)const{
     return !(*this<=y);
 }
 
 template<class T>
-bool Vector<T>::operator<(const Vector<T>& y){
+bool Vector<T>::operator<(const Vector<T>& y)const{
     return !(*this>=y);
 }
 

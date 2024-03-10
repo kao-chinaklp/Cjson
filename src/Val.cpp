@@ -97,7 +97,7 @@ bool operator<(const Val& x, const Val& y){
     if(x._type==Type::Int)return get<int>(x.val)<get<int>(y.val);
     if(x._type==Type::Double)return get<double>(x.val)<get<double>(y.val);
     if(x._type==Type::Bool)return get<bool>(x.val)<get<bool>(y.val);
-    if(x._type==Type::String)return get<String>(x.val)<get<String>(y.val);
+    if(x._type==Type::String)return (String)get<String>(x.val)<(String)get<String>(y.val);
     if(x._type==Type::List)return get<List>(x.val)<get<List>(y.val);
     if(x._type==Type::Dict)return get<Dict>(x.val)<get<Dict>(y.val);
     return false;
@@ -106,9 +106,9 @@ bool operator<(const Val& x, const Val& y){
 ostream& operator<<(ostream& out, const Val& val){
     if(val._type==Type::List){
         out<<'[';
-        for(ui i=0, lim=get<Vector<Val> >(val.val).Size();i<lim;i++){
+        for(int i=0, lim=get<Vector<Val> >(val.val).Size();i<lim;i++){
             if(i)out<<',';
-            out<<val[static_cast<int>(i)];
+            out<<val[i];
         }
         out<<']';
     }
@@ -117,7 +117,7 @@ ostream& operator<<(ostream& out, const Val& val){
         const map<Val, Val>& Dct=get<map<Val, Val> >(val.val);
         for(auto p=Dct.begin();p!=Dct.end();p++){
             if(p!=Dct.begin())out<<',';
-            out<<p->second;
+            out<<p->first<<':'<<p->second;
         }
         out<<'}';
     }

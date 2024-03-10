@@ -59,8 +59,8 @@ class String{
         String& operator+=(char* p);
         bool operator==(const String& str);
         bool operator!=(const String& str);
-        bool operator<(const String& str);
-        bool operator>(const String& str);
+        bool operator<(const String& str)const;
+        bool operator>(const String& str)const;
 
     private:
         Vector<char>Data;
@@ -76,5 +76,6 @@ String ToString(long long num);
 String ToString(double num);
 long long ToDigit(String str);
 double ToDouble(String str);
+bool GetLine(std::istream& in, String& str);
 
 #endif

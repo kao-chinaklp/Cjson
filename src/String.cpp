@@ -236,7 +236,7 @@ bool String::operator!=(const String& str){
     return !(*this==str);
 }
 
-bool String::operator<(const String& str){
+bool String::operator<(const String& str)const{
     if(this->Size()==str.Size()){
         for(ui i=0, len=this->Size();i<len;i++)
             if(Data[i]>=str[i])return false;
@@ -255,7 +255,7 @@ bool String::operator<(const String& str){
     }
 }
 
-bool String::operator>(const String& str){
+bool String::operator>(const String& str)const{
     if(this->Size()==str.Size()){
         for(ui i=0, len=this->Size();i<len;i++)
             if(Data[i]<=str[i])return false;
@@ -273,6 +273,7 @@ bool String::operator>(const String& str){
         return flag;
     }
 }
+
 
 std::istream& operator>>(std::istream& o, String& str){
     char tmp;
@@ -376,4 +377,15 @@ double ToDouble(String str){
         }
     }
     return (sign?-1:1)*num;
+}
+
+bool GetLine(std::istream& in, String& str){
+    char c;
+    str.Clear();
+    while(in.get(c)){
+        if(c=='\n')break;
+        str.PushBack(c);
+    }
+    if(str.Size()==0)return false;
+    return true;
 }
