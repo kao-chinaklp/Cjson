@@ -167,7 +167,7 @@ Vector<T>::Vector(Vector<T>&& x)noexcept{
     this->Rfinish=x.Rfinish;x.Rfinish=nullptr;
 }
 
-template <class T>
+template<class T>
 Vector<T>& Vector<T>::operator=(const Vector<T>& x){
     IsInit=false;
     Start=new T[x.Capacity()];
@@ -180,7 +180,7 @@ Vector<T>& Vector<T>::operator=(const Vector<T>& x){
     return *this;
 }
 
-template <class T>
+template<class T>
 Vector<T>& Vector<T>::operator=(Vector<T>&& x)noexcept{
     IsInit=false;
     this->Start=x.Start;x.Start=nullptr;
@@ -191,7 +191,7 @@ Vector<T>& Vector<T>::operator=(Vector<T>&& x)noexcept{
     return *this;
 }
 
-template <class T>
+template<class T>
 T &Vector<T>::operator[](ui pos)
 {
     assert(pos<Size());

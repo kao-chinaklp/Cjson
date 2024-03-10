@@ -1,88 +1,83 @@
 #include "Cjson.h"
 
-using std::get;
+using std::isdigit;
 
-void Val::GetValue(const List& val){
-    Del();
-    Lst=val;
-    _type=Type::List;
+Val Cjson::Parse(const String& json){
+    ss.clear();
+    ss<<json;
+    return ParseVal();
 }
 
-void Val::GetValue(const Dict& val){
-    Del();
-    Dct=val;
-    _type=Type::Dict;
+Val Cjson::Parse(const char* json){
+    ss.clear();
+    ss<<String(json);
+    return ParseVal();
 }
 
-void Val::GetValue(const Val& val){
-    Del();
-    *this=val;
-}
-
-void Val::GetValue(Value&& val){
-    Del();
-    this->val=val;
-    switch(val.index()){
-        case 1:_type=Type::Int;break;
-        case 2:_type=Type::Double;break;
-        case 3:_type=Type::Bool;break;
-        case 4:_type=Type::String;break;
-        default:_type=Type::Null;
+Val Cjson::ParseVal(){
+    while(ss.peek()!=-1){
+        if(ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r')ss.get();
+        else if(ss.peek()=='"')return ParseStr();
+        else if(ss.peek()=='[')return ParseList();
+        else if(ss.peek()=='{')return ParseDict();
+        else if(ss.peek()=='t'||ss.peek()=='f')return ParseBool();
+        else return ParseNum();
     }
-    val=0;
+    return 0;
 }
 
-Val& Val::operator[](const Val& key){
-    if(_type==Type::List){
-        if(key.val.index()!=1)throw "Unexpect index!";
-        else return Lst[get<int>(key.val)];
+Val Cjson::ParseNum(){
+    String num;
+    while(isdigit(ss.peek())||ss.peek()=='e'||ss.peek()=='E'||ss.peek()=='.'||ss.peek()=='-'||ss.peek()=='+')
+        num.PushBack(ss.get());
+    if(num.Find('.')==(ui)-1||num.Find('e')==(ui)-1||num.Find('E')==(ui)-1)
+        return ToDouble(num);
+    return (int)ToDigit(num);
+}
+
+Val Cjson::ParseBool(){
+    if(ss.peek()=='t'){
+        ss.get();ss.get();ss.get();
+        return true;
     }
-    if(_type==Type::Dict)return Dct.at(key);
-    return *this;
-}
-
-const Val& Val::operator[](const Val& key)const{
-    if(_type==Type::List){
-        if(key.val.index()!=1)throw "Unexpect index!";
-        else return Lst[get<int>(key.val)];
+    else{
+        ss.get();ss.get();ss.get();ss.get();
+        return false;
     }
-    if(_type==Type::Dict)return Dct.at(key);
-    return *this;
 }
 
-void Val::Del(){
-    if(_type==Type::List)Lst.Clear();
-    else if(_type==Type::Dict)Dct.clear();
-    else val=0;
+Val Cjson::ParseStr(){
+    ss.get();
+    String str;
+    while(ss.peek()!='"')str.PushBack(ss.get());
+    ss.get();
+    return str;
 }
 
-bool operator<(const Val& x, const Val& y){
-    if(x._type!=y._type)return x._type<y._type;
-    if(x._type==Type::List)return x.Lst<y.Lst;
-    else if(x._type==Type::Dict)return x.Dct<y.Dct;
-    else return x.val<y.val;
-}
-
-ostream& operator<<(ostream& out, const Val& val){
-    if(val._type==Type::List){
-        out<<'[';
-        for(ui i=0, lim=val.Lst.Size();i<lim;i++){
-            if(i)out<<',';
-            out<<val[i];
-        }
-        out<<']';
+Val Cjson::ParseList(){
+    ss.get();
+    Val list=Vector<Val>();
+    while(ss.peek()!=']'){
+        list.Add(ParseVal());
+        while(ss.peek()!=']'&&(ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r'||ss.peek()==','))
+            ss.get();
     }
-    if(val._type==Type::Dict){
-        out<<'{';
-        for(auto p=val.Dct.begin();p!=val.Dct.end();p++){
-            if(p!=val.Dct.begin())out<<',';
-            out<<p->second;
-        }
-        out<<'}';
+    ss.get();
+    return list;
+}
+
+Val Cjson::ParseDict(){
+    ss.get();
+    Val dict=map<Val, Val>();
+    while(ss.peek()!='}'){
+        Val key=ParseVal();
+        while(ss.peek()==' '||ss.peek()==':')
+            ss.get();
+        Val val=ParseVal();
+        dict.Put(key, val);
+        while(ss.peek()!='}'&&(ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r'||ss.peek()==','))
+            ss.get();
     }
-    if(val._type==Type::Int)out<<get<int>(val.val);
-    if(val._type==Type::Double)out<<get<double>(val.val);
-    if(val._type==Type::Bool)out<<get<bool>(val.val);
-    if(val._type==Type::String)out<<get<String>(val.val);
-    return out;
+    ss.get();
+    return dict;
 }

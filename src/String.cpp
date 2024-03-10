@@ -49,7 +49,7 @@ ui String::Find(const String str, const ui pos){
     // KMP
     ui* nxt=new ui[this->Size()];
     ui j=0, len=str.Size();
-    for(int i=0;i<len;i++){
+    for(ui i=0;i<len;i++){
         while(j!=0&&str[i]!=str[j])j=nxt[j-1];
         if(str[i]==str[j])j++;
         nxt[i]=j;
@@ -120,7 +120,7 @@ String::iterator String::Erase(String::iterator p){
 String String::Substr(const ui pos, const ui size){
     assert(pos+size<=this->Size());
     String res="";
-    for(int p=pos;p<pos+size;p++)
+    for(ui p=pos;p<pos+size;p++)
         res.PushBack((*this)[p]);
     return res;
 }
@@ -285,6 +285,11 @@ std::ostream& operator<<(std::ostream& o, const String& str){
     return o;
 }
 
+std::stringstream& operator<<(std::stringstream& o, const String& str){
+    for(char c:str)o<<c;
+    return o;
+}
+
 String operator+(const char c, const String& str){
     String tmp(str);
     tmp.Insert(tmp.begin(), c);
@@ -308,6 +313,25 @@ String ToString(long long num){
     return (sign?"":"-")+ans;
 }
 
+String ToString(double num){
+    if(num==0)return String("0");
+    String ans;
+    bool sign=true;
+    if(num<0)sign=false;
+    long long int_part=(long long)num;
+    double dec_part=num-int_part;
+    if(int_part==0)ans.PushBack('0');
+    else ans=ToString(int_part);
+    if(dec_part==0)return (sign?"":"-")+ans;
+    ans.PushBack('.');
+    dec_part*=10;
+    while(dec_part!=0){
+        ans.PushBack(char((int)dec_part)+'0');
+        dec_part*=10;
+    }
+    return (sign?"":"-")+ans;
+}
+
 long long ToDigit(String str){
     long long num=0;
     bool sign=false;
@@ -320,6 +344,31 @@ long long ToDigit(String str){
         auto tmp=str[p];
         assert(std::isdigit(str[p]));
         num=num*10+str[p++]-'0';
+    }
+    return (sign?-1:1)*num;
+}
+
+double ToDouble(String str){
+    double num=0;
+    bool sign=false;
+    ui p=0;
+    if(str[p]=='-'){
+        sign=true;
+        p++;
+    }
+    while(p<str.Size()){
+        if(str[p]=='.')break;
+        assert(std::isdigit(str[p]));
+        num=num*10+str[p++]-'0';
+    }
+    if(p<str.Size()){
+        p++;
+        double dec=0.1;
+        while(p<str.Size()){
+            assert(std::isdigit(str[p]));
+            num+=dec*(str[p++]-'0');
+            dec*=0.1;
+        }
     }
     return (sign?-1:1)*num;
 }

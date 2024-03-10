@@ -3,7 +3,8 @@
 
 #include "Vector.h"
 
-#include <fstream>
+#include <sstream>
+#include <iostream>
 
 class String{
     public:
@@ -66,10 +67,13 @@ class String{
 
 std::istream& operator>>(std::istream& o, String& str);
 std::ostream& operator<<(std::ostream& o, const String& str);
+std::stringstream& operator<<(std::stringstream& o, const String& str);
 String operator+(const char c, const String& str);
 String operator+(const char* p, const String& str);
 
 String ToString(long long num);
+String ToString(double num);
 long long ToDigit(String str);
+double ToDouble(String str);
 
 #endif
