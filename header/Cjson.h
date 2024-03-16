@@ -1,33 +1,36 @@
-// This is a mini library used to parse JSON, 
-// where "C" represents "chinaklp" rather than "cpp".
-
 #ifndef CJSON_H_
 #define CJSON_H_
 
-#include "Val.h"
+#include "Cobject.h"
 
 #include <sstream>
 
 using std::stringstream;
 
 class Cjson{
-    public:
-        Cjson(){};
-        ~Cjson(){};
+    typedef Vector<Cobject> List;
+    typedef map<String, Cobject> Dict;
 
-        Val Parse(const String& json);
-        Val Parse(const char* json);
+    public:
+        Cjson()=default;
+        ~Cjson()=default;
+
+        Cobject Parse(const String& Str);
+        String Serialize(const Cobject& Obj);
 
     protected:
-        Val ParseVal();
-        Val ParseNum();
-        Val ParseBool();
-        Val ParseStr();
-        Val ParseList();
-        Val ParseDict();
+        Cobject ParseValue();
+        Cobject ParseNull();
+        Cobject ParseBool();
+        Cobject ParseNum();
+        Cobject ParseString();
+        Cobject ParseNumber();
+        Cobject ParseList();
+        Cobject ParseDict();
 
     private:
         stringstream ss;
+        Cobject Root;
 };
 
 #endif

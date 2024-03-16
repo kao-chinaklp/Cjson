@@ -1,19 +1,19 @@
 #include "Cjson.h"
 
 #include <String.h>
-#include <fstream>
+
 #include <iostream>
 
 using namespace std;
 
 int main(){
-    std::ifstream fin("compile_commands.json");
-    Cjson cjson;
+    freopen("compile_commands.json", "r", stdin);
     String str, tmp;
-    while(GetLine(fin, tmp))
+    while(cin>>tmp)
         str+=tmp;
-    cout<<str<<endl;
-    Val val=cjson.Parse(str);
-    cout<<val["directory"]<<endl;
+    str+=tmp;
+    Cjson json;
+    auto obj=json.Parse(str);
+    cout<<json.Serialize(obj)<<endl;
     return 0;
 }
