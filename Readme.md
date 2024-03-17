@@ -1,3 +1,2 @@
 ## What's this
-A JSON library for practice written in C++.  
-The "C" here refers to chinaklp rather than "C++"
+A JSON library for practice written in C++. The "C" here refers to chinaklp rather than "C++". This project is based on my own implementation of Vector and String, and there may inevitably be some performance and coding style issues. Don't complain if you don't like it.
