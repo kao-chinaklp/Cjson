@@ -121,7 +121,7 @@ Cobject Cjson::ParseString(){
     ss.get();
     String s;
     char c;
-    while(ss.peek()!='"'){
+    while(ss.peek()!='"'&&ss.peek()!=-1){
         c=ss.get();
         if(c!='\\')s.Append(c);
         else {
@@ -158,6 +158,7 @@ Cobject Cjson::ParseString(){
             }
         }
     }
+    if(ss.peek()==-1)throw std::runtime_error("Invalid string expression!");
     ss.get();
     return Cobject(s);
 }
