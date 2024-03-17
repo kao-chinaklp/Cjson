@@ -336,7 +336,7 @@ long long ToDigit(String str){
         p++;
     }
     while(p<str.Size()){
-        auto tmp=str[p];
+        char tmp=str[p];
         assert(std::isdigit(str[p]));
         num=num*10+str[p++]-'0';
     }

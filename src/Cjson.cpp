@@ -1,52 +1,69 @@
 #include "Cjson.h"
 
-using std::isdigit;
+using std::isdigit, std::exception, std::exception;
 
 Cobject Cjson::Parse(const String& Str){
-    ss.clear();
-    ss<<Str;
+    try{
+        ss.clear();
+        ss<<Str;
+    }catch(exception& e){
+        ErrorList.Push(e.what());
+        return Cobject(nullptr);
+    }
     return ParseValue();
 }
 
 String Cjson::Serialize(const Cobject& obj){
     String res;
-    obj.Visit(
-        [&](const String& sv){
-            res.Append('"');
-            res.Append(sv);
-            res.Append('"');
-        },
-        [&](long long iv){res+=ToString(iv);},
-        [&](double dv){res+=ToString(dv);},
-        [&](bool bv){res+=bv?"true":"false";},
-        [&](const List& lst){
-            res.Append("[");
-            for(ui i=0;i<lst.Size();++i){
-                if(i)res.Append(',');
-                res+=Serialize(lst[i]);
-            }
-            res.Append("]");
-        },
-        [&](const Dict& dct){
-            if(dct.empty()){
-                res.Append("{}");
-                return;
-            }
-            bool flag=false;
-            res.Append("{");
-            for(auto& [key, val]:dct){
-                if(flag)res.Append(",");
-                else flag=true;
-                res+=key;
-                res.Append(':');
-                res+=Serialize(val);
-            }
-            res.Append("}");
-        },
-        [&](nullptr_t){res.Append("null");},
-        [&](auto arg){arg=0;}
-    );
+    try{
+        obj.Visit(
+            [&](const String& sv){
+                res.Append('"');
+                res.Append(sv);
+                res.Append('"');
+            },
+            [&](long long iv){res+=ToString(iv);},
+            [&](double dv){res+=ToString(dv);},
+            [&](bool bv){res+=bv?"true":"false";},
+            [&](const List& lst){
+                res.Append("[");
+                for(ui i=0;i<lst.Size();++i){
+                    if(i)res.Append(',');
+                    res+=Serialize(lst[i]);
+                }
+                res.Append("]");
+            },
+            [&](const Dict& dct){
+                if(dct.empty()){
+                    res.Append("{}");
+                    return;
+                }
+                bool flag=false;
+                res.Append("{");
+                for(auto& [key, val]:dct){
+                    if(flag)res.Append(",");
+                    else flag=true;
+                    res+=+"\""+key+"\"";
+                    res.Append(':');
+                    res+=Serialize(val);
+                }
+                res.Append("}");
+            },
+            [&](nullptr_t){res.Append("null");},
+            [&](auto arg){arg=0;}
+        );
+    }catch(exception& e){
+        res.Append("null");
+        ErrorList.Push(e.what());
+    }
     return res;
+}
+
+String Cjson::GetError(){
+    if(ErrorList.Empty())return String();
+    String tmp=ErrorList.Front();
+    ErrorList.Pop();
+    return tmp;
 }
 
 Cobject Cjson::ParseValue(){
@@ -64,50 +81,30 @@ Cobject Cjson::ParseValue(){
 
 Cobject Cjson::ParseNull(){
     char c;
-    ss>>c;
-    if(c=='n'||c=='N'){
-        ss>>c;
-        if(c=='u'||c=='U'){
-            ss>>c;
-            if(c=='l'||c=='L'){
-                ss>>c;
-                if(c=='l'||c=='L')
-                    return Cobject(nullptr);
-            }
-        }
-    }
+    c=ss.get(); if(c!='n'&&c!='N')throw std::runtime_error("Invalid null value");
+    c=ss.get(); if(c!='u'&&c!='U')throw std::runtime_error("Invalid null value");
+    c=ss.get(); if(c!='l'&&c!='L')throw std::runtime_error("Invalid null value");
+    c=ss.get(); if(c!='l'&&c!='L')throw std::runtime_error("Invalid null value");
     return Cobject();
 }
 
 Cobject Cjson::ParseBool(){
     char c;
-    ss>>c;
+    c=ss.get();
     if(c=='t'||c=='T'){
-        ss>>c;
-        if(c=='r'||c=='R'){
-            ss>>c;
-            if(c=='u'||c=='U'){
-                ss>>c;
-                if(c=='e'||c=='E')
-                    return Cobject(true);
-            }
-        }
+        c=ss.get(); if(c!='r'&&c!='R')throw std::runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='u'&&c!='U')throw std::runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='e'&&c!='E')throw std::runtime_error("Invalid bool value");
+        return Cobject(true);
     }
     else if(c=='f'||c=='F'){
-        ss>>c;
-        if(c=='a'||c=='A'){
-            ss>>c;
-            if(c=='l'||c=='L'){
-                ss>>c;
-                if(c=='s'||c=='S'){
-                    ss>>c;
-                    if(c=='e'||c=='E')
-                        return Cobject(false);
-                }
-            }
-        }
+        c=ss.get(); if(c!='a'&&c!='A')throw std::runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='l'&&c!='L')throw std::runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='s'&&c!='S')throw std::runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='e'&&c!='E')throw std::runtime_error("Invalid bool value");
+        return Cobject(false);
     }
-    return Cobject();
+    return Cobject(nullptr);
 }
 
 Cobject Cjson::ParseNum(){
@@ -168,10 +165,11 @@ Cobject Cjson::ParseString(){
 Cobject Cjson::ParseList(){
     ss.get();
     Vector<Cobject> List;
-    while(ss.peek()!=']'){
+    while(ss.peek()!=']'&&ss.peek()!=-1){
         List.PushBack(ParseValue());
         while(ss.peek()!=']'&&(ss.peek()==','||ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r'))ss.get();
     }
+    if(ss.peek()==-1)throw std::runtime_error("Invalid list expression!");
     ss.get();
     return Cobject(List);
 }
@@ -179,13 +177,14 @@ Cobject Cjson::ParseList(){
 Cobject Cjson::ParseDict(){
     ss.get();
     map<String, Cobject> Dct;
-    while(ss.peek()!='}'){
+    while(ss.peek()!='}'&&ss.peek()!=-1){
         String Key=ParseValue().Get<String>();
         while(ss.peek()==' '||ss.peek()==':')ss.get();
         Cobject Value=ParseValue();
         Dct[Key]=Value;
         while(ss.peek()!='}'&&(ss.peek()==','||ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r'))ss.get();
     }
+    if(ss.peek()==-1)throw std::runtime_error("Invalid dictionary expression!");
     ss.get();
     return Cobject(Dct);
 }
@@ -197,7 +196,7 @@ char Cjson::ParseHex4(const String& str){
         if(str[i]>='0'&&str[i]<='9')res|=str[i]-'0';
         else if(str[i]>='a'&&str[i]<='f')res|=str[i]-'a'+10;
         else if(str[i]>='A'&&str[i]<='F')res|=str[i]-'A'+10;
-        else return '\0';
+        else throw std::runtime_error("Invalid hex value!");
     }
     return res;
 }
