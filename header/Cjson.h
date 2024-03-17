@@ -28,6 +28,9 @@ class Cjson{
         Cobject ParseList();
         Cobject ParseDict();
 
+        char ParseHex4(const String& str);
+        void EncodeUtf8(String& str, unsigned c);
+
     private:
         stringstream ss;
         Cobject Root;

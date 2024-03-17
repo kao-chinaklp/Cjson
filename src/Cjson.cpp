@@ -71,9 +71,8 @@ Cobject Cjson::ParseNull(){
             ss>>c;
             if(c=='l'||c=='L'){
                 ss>>c;
-                if(c=='l'||c=='L'){
+                if(c=='l'||c=='L')
                     return Cobject(nullptr);
-                }
             }
         }
     }
@@ -127,8 +126,40 @@ Cobject Cjson::ParseString(){
     char c;
     while(ss.peek()!='"'){
         c=ss.get();
-        if(c=='\\')s.Append(ss.get());
-        else s.Append(c);
+        if(c!='\\')s.Append(c);
+        else {
+            c=ss.get();
+            if(c=='"')s.Append('"');
+            else if(c=='\\')s.Append('\\');
+            else if(c=='/')s.Append('/');
+            else if(c=='b')s.Append('\b');
+            else if(c=='f')s.Append('\f');
+            else if(c=='n')s.Append('\n');
+            else if(c=='r')s.Append('\r');
+            else if(c=='t')s.Append('\t');
+            else if(c=='u'){
+                String hex;
+                for(ui i=0;i<4;++i){
+                    c=ss.get();
+                    if((c>='0'&&c<='9')||(c>='a'&&c<='f')||(c>='A'&&c<='F'))hex.Append(c);
+                    else return NULL;
+                }
+                unsigned tmp=ParseHex4(hex);
+                if(tmp>=0xD800&&tmp<=0xDBFF){
+                    if(ss.get()!='\\'||ss.get()!='u')return NULL;
+                    String hex2;
+                    for(ui i=0;i<4;++i){
+                        c=ss.get();
+                        if((c>='0'&&c<='9')||(c>='a'&&c<='f')||(c>='A'&&c<='F'))hex2.Append(c);
+                        else return NULL;
+                    }
+                    unsigned tmp2=ParseHex4(hex2);
+                    if(tmp2<0xDC00||tmp2>0xDFFF)return NULL;
+                    tmp=(((tmp-0xD800)<<10)|(tmp2-0xDC00))+0x10000;
+                }
+                EncodeUtf8(s, tmp);
+            }
+        }
     }
     ss.get();
     return Cobject(s);
@@ -157,4 +188,35 @@ Cobject Cjson::ParseDict(){
     }
     ss.get();
     return Cobject(Dict);
+}
+
+char Cjson::ParseHex4(const String& str){
+    char res=0;
+    for(ui i=0;i<4;++i){
+        res<<=4;
+        if(str[i]>='0'&&str[i]<='9')res|=str[i]-'0';
+        else if(str[i]>='a'&&str[i]<='f')res|=str[i]-'a'+10;
+        else if(str[i]>='A'&&str[i]<='F')res|=str[i]-'A'+10;
+        else return '\0';
+    }
+    return res;
+}
+
+void Cjson::EncodeUtf8(String& str, unsigned c){
+    if(c<=0x7F)str.Append(c&0xFF);
+    else if(c<=0x7FF){
+        str.Append(0xC0|(c>>6));
+        str.Append(0x80|(c&0x3F));
+    }
+    else if(c<=0xFFFF){
+        str.Append(0xE0|(c>>12));
+        str.Append(0x80|((c>>6)&0x3F));
+        str.Append(0x80|(c&0x3F));
+    }
+    else if(c<=0x10FFFF){
+        str.Append(0xF0|(c>>18));
+        str.Append(0x80|((c>>12)&0x3F));
+        str.Append(0x80|((c>>6)&0x3F));
+        str.Append(0x80|(c&0x3F));
+    }
 }
