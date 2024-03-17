@@ -44,7 +44,7 @@ String Cjson::Serialize(const Cobject& obj){
             res.Append("}");
         },
         [&](nullptr_t){res.Append("null");},
-        [&](auto arg){}
+        [&](auto arg){arg=0;}
     );
     return res;
 }
@@ -178,16 +178,16 @@ Cobject Cjson::ParseList(){
 
 Cobject Cjson::ParseDict(){
     ss.get();
-    map<String, Cobject> Dict;
+    map<String, Cobject> Dct;
     while(ss.peek()!='}'){
         String Key=ParseValue().Get<String>();
         while(ss.peek()==' '||ss.peek()==':')ss.get();
         Cobject Value=ParseValue();
-        Dict[Key]=Value;
+        Dct[Key]=Value;
         while(ss.peek()!='}'&&(ss.peek()==','||ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r'))ss.get();
     }
     ss.get();
-    return Cobject(Dict);
+    return Cobject(Dct);
 }
 
 char Cjson::ParseHex4(const String& str){

@@ -57,8 +57,10 @@ class String{
         String& operator+=(const String& str);
         String& operator+=(const char& c);
         String& operator+=(char* p);
-        bool operator==(const String& str);
-        bool operator!=(const String& str);
+        bool operator==(const String& str)const;
+        bool operator!=(const String& str)const;
+        bool operator<=(const String& str)const;
+        bool operator>=(const String& str)const;
         bool operator<(const String& str)const;
         bool operator>(const String& str)const;
 

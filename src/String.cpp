@@ -1,5 +1,7 @@
 #include "String.h"
 
+using std::min;
+
 ui Strlen(const char* p){
     ui cnt=0;
     while(*p!='\0')++cnt, ++p;
@@ -224,7 +226,7 @@ String& String::operator+=(char* p){
     return *this;
 }
 
-bool String::operator==(const String& str){
+bool String::operator==(const String& str)const{
     if(this->Size()!=str.Size())return false;
     ui len=this->Size();
     for(ui i=0;i<len;i++)
@@ -232,48 +234,35 @@ bool String::operator==(const String& str){
     return true;
 }
 
-bool String::operator!=(const String& str){
+bool String::operator!=(const String& str)const{
     return !(*this==str);
 }
 
+bool String::operator<=(const String& str)const{
+    ui len=min(this->Size(), str.Size());
+    for(ui i=0;i<len;i++){
+        if(Data[i]>str[i])return false;
+        if(Data[i]<str[i])return true;
+    }
+    return true;
+}
+
+bool String::operator>=(const String& str)const{
+    ui len=min(this->Size(), str.Size());
+    for(ui i=0;i<len;i++){
+        if(Data[i]<str[i])return false;
+        if(Data[i]>str[i])return true;
+    }
+    return true;
+}
+
 bool String::operator<(const String& str)const{
-    if(this->Size()==str.Size()){
-        for(ui i=0, len=this->Size();i<len;i++)
-            if(Data[i]>=str[i])return false;
-        return true;
-    }
-    else {
-        ui len=0;
-        bool flag=false;
-        if(this->Size()>str.Size())
-            len=str.Size(), flag=false;
-        else 
-            len=this->Size(), flag=true;
-        for(ui i=0;i<len;i++)
-            if(Data[i]>=str[i])return false;
-        return flag;
-    }
+    return !(*this>=str);
 }
 
 bool String::operator>(const String& str)const{
-    if(this->Size()==str.Size()){
-        for(ui i=0, len=this->Size();i<len;i++)
-            if(Data[i]<=str[i])return false;
-        return true;
-    }
-    else {
-        ui len=0;
-        bool flag=false;
-        if(this->Size()>str.Size())
-            len=str.Size(), flag=true;// Different from less
-        else 
-            len=this->Size(), flag=false;
-        for(ui i=0;i<len;i++)
-            if(Data[i]<=str[i])return false;
-        return flag;
-    }
+    return !(*this<=str);
 }
-
 
 std::istream& operator>>(std::istream& o, String& str){
     char tmp;
