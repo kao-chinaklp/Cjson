@@ -33,7 +33,6 @@ class Cjson{
 
     private:
         stringstream ss;
-        Cobject Root;
 };
 
 #endif
