@@ -1,16 +1,18 @@
 #include "Cjson.h"
 
-using std::isdigit, std::exception, std::exception;
+using std::isdigit, std::exception, std::exception, std::runtime_error;
 
 Cobject Cjson::Parse(const String& Str){
+    Cobject tmp;
     try{
         ss.clear();
         ss<<Str;
+        tmp=ParseValue();
     }catch(exception& e){
-        ErrorList.Push(e.what());
-        return Cobject(nullptr);
+        ErrorInfo=e.what();
+        return Cobject(Error());
     }
-    return ParseValue();
+    return tmp;
 }
 
 String Cjson::Serialize(const Cobject& obj){
@@ -53,38 +55,35 @@ String Cjson::Serialize(const Cobject& obj){
             [&](auto arg){arg=0;}
         );
     }catch(exception& e){
-        res.Append("null");
-        ErrorList.Push(e.what());
+        ErrorInfo=e.what();
+        return "";
     }
     return res;
 }
 
-String Cjson::GetError(){
-    if(ErrorList.Empty())return String();
-    String tmp=ErrorList.Front();
-    ErrorList.Pop();
-    return tmp;
+String Cjson::GetError()const{
+    return ErrorInfo;
 }
 
 Cobject Cjson::ParseValue(){
     while(ss.peek()!=-1){
         if(ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r')ss.get();
+        else if(ss.peek()=='f'||ss.peek()=='t'||ss.peek()=='F'||ss.peek()=='T')return ParseBool();
+        else if(ss.peek()=='n'||ss.peek()=='N')return ParseNull();
         else if(ss.peek()=='"')return ParseString();
-        else if(ss.peek()=='f'||ss.peek()=='t')return ParseBool();
         else if(ss.peek()=='[')return ParseList();
         else if(ss.peek()=='{')return ParseDict();
-        else if(ss.peek()=='n'||ss.peek()=='N')return ParseNull();
-        else ParseNum();
+        else return ParseNum();
     }
     return Cobject();
 }
 
 Cobject Cjson::ParseNull(){
     char c;
-    c=ss.get(); if(c!='n'&&c!='N')throw std::runtime_error("Invalid null value");
-    c=ss.get(); if(c!='u'&&c!='U')throw std::runtime_error("Invalid null value");
-    c=ss.get(); if(c!='l'&&c!='L')throw std::runtime_error("Invalid null value");
-    c=ss.get(); if(c!='l'&&c!='L')throw std::runtime_error("Invalid null value");
+    c=ss.get(); if(c!='n'&&c!='N')throw runtime_error("Invalid null value");
+    c=ss.get(); if(c!='u'&&c!='U')throw runtime_error("Invalid null value");
+    c=ss.get(); if(c!='l'&&c!='L')throw runtime_error("Invalid null value");
+    c=ss.get(); if(c!='l'&&c!='L')throw runtime_error("Invalid null value");
     return Cobject();
 }
 
@@ -92,16 +91,16 @@ Cobject Cjson::ParseBool(){
     char c;
     c=ss.get();
     if(c=='t'||c=='T'){
-        c=ss.get(); if(c!='r'&&c!='R')throw std::runtime_error("Invalid bool value");
-        c=ss.get(); if(c!='u'&&c!='U')throw std::runtime_error("Invalid bool value");
-        c=ss.get(); if(c!='e'&&c!='E')throw std::runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='r'&&c!='R')throw runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='u'&&c!='U')throw runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='e'&&c!='E')throw runtime_error("Invalid bool value");
         return Cobject(true);
     }
     else if(c=='f'||c=='F'){
-        c=ss.get(); if(c!='a'&&c!='A')throw std::runtime_error("Invalid bool value");
-        c=ss.get(); if(c!='l'&&c!='L')throw std::runtime_error("Invalid bool value");
-        c=ss.get(); if(c!='s'&&c!='S')throw std::runtime_error("Invalid bool value");
-        c=ss.get(); if(c!='e'&&c!='E')throw std::runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='a'&&c!='A')throw runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='l'&&c!='L')throw runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='s'&&c!='S')throw runtime_error("Invalid bool value");
+        c=ss.get(); if(c!='e'&&c!='E')throw runtime_error("Invalid bool value");
         return Cobject(false);
     }
     return Cobject(nullptr);
@@ -114,7 +113,7 @@ Cobject Cjson::ParseNum(){
     if(s.Find('.')!=(ui)-1||s.Find('e')!=(ui)-1||s.Find('E')!=(ui)-1)
         return Cobject(ToDouble(s));
     else
-        return Cobject(ToDigit(s));
+        return Cobject(static_cast<int>(ToDigit(s)));
 }
 
 Cobject Cjson::ParseString(){
@@ -158,7 +157,7 @@ Cobject Cjson::ParseString(){
             }
         }
     }
-    if(ss.peek()==-1)throw std::runtime_error("Invalid string expression!");
+    if(ss.peek()==-1)throw runtime_error("Invalid string expression!");
     ss.get();
     return Cobject(s);
 }
@@ -170,7 +169,7 @@ Cobject Cjson::ParseList(){
         List.PushBack(ParseValue());
         while(ss.peek()!=']'&&(ss.peek()==','||ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r'))ss.get();
     }
-    if(ss.peek()==-1)throw std::runtime_error("Invalid list expression!");
+    if(ss.peek()==-1)throw runtime_error("Invalid list expression!");
     ss.get();
     return Cobject(List);
 }
@@ -185,7 +184,7 @@ Cobject Cjson::ParseDict(){
         Dct[Key]=Value;
         while(ss.peek()!='}'&&(ss.peek()==','||ss.peek()==' '||ss.peek()=='\n'||ss.peek()=='\t'||ss.peek()=='\r'))ss.get();
     }
-    if(ss.peek()==-1)throw std::runtime_error("Invalid dictionary expression!");
+    if(ss.peek()==-1)throw runtime_error("Invalid dictionary expression!");
     ss.get();
     return Cobject(Dct);
 }
@@ -197,7 +196,7 @@ char Cjson::ParseHex4(const String& str){
         if(str[i]>='0'&&str[i]<='9')res|=str[i]-'0';
         else if(str[i]>='a'&&str[i]<='f')res|=str[i]-'a'+10;
         else if(str[i]>='A'&&str[i]<='F')res|=str[i]-'A'+10;
-        else throw std::runtime_error("Invalid hex value!");
+        else throw runtime_error("Invalid hex value!");
     }
     return res;
 }

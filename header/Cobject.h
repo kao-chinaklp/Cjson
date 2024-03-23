@@ -9,7 +9,7 @@
 using std::variant, std::nullptr_t, std::map, std::get_if, std::get,
       std::visit, std::forward;
 
-enum class CobjectType{Null, Int, Double, Bool, String, List, Dict};
+enum class CobjectType{Null, Int, Double, Bool, String, List, Dict, Error};
 
 template<typename...  T>struct overload:T...{
     using T::operator()...;
@@ -17,9 +17,10 @@ template<typename...  T>struct overload:T...{
 template<typename... T>overload(T...)->overload<T...>;
 class Cobject{
     public:
+        struct Error{Error(long long arg=0){};};
         typedef Vector<Cobject> List;
         typedef map<String, Cobject> Dict;
-        typedef variant<nullptr_t, int, double, bool, String, List, Dict> ValueType;
+        typedef variant<nullptr_t, int, double, bool, String, List, Dict, Error> ValueType;
 
     public:
         Cobject()=default;

@@ -2,7 +2,6 @@
 #define CJSON_H_
 
 #include "Cobject.h"
-#include "Queue.h"
 
 #include <sstream>
 
@@ -18,7 +17,9 @@ class Cjson{
 
         Cobject Parse(const String& Str);
         String Serialize(const Cobject& Obj);
-        String GetError();
+        String GetError()const;
+        
+        using Error=Cobject::Error;
 
     protected:
         Cobject ParseValue();
@@ -35,7 +36,7 @@ class Cjson{
 
     private:
         stringstream ss;
-        Queue<String>ErrorList;
+        String ErrorInfo;
 };
 
 #endif
